@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.13] - 2025-10-20
+
+### Fixed
+- **GitHub Actions workflow permissions** - Added `contents: write` permission to allow automated GitHub release creation
+
+### Improved
+- Releases now properly marked as beta/prerelease in GitHub
+- Release titles include "(Beta)" designation
+
+## [0.9.12] - 2025-10-20
+
+### Fixed
+- **CRITICAL:** Fixed crash in API error handling - `this.log.error is not a function`
+  - API class was calling `this.log.error()` but only had `this.log()` available
+  - Changed to `this.log('ERROR: ...')` for consistency with rest of codebase
+  - Users will now see proper error messages instead of crashes
+  - Affects initialization failures and profile API errors
+
+### Improved
+- Better error visibility when profile API returns 403 Unauthorized Access
+
 ## [0.9.10] - 2025-10-20
 
 ### Fixed
