@@ -1,0 +1,89 @@
+{
+  "pluginAlias": "Mopar",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Control your Mopar vehicle (Chrysler, Dodge, Jeep, Ram, Fiat, Alfa Romeo) through HomeKit. Requires an active Mopar.com account with Uconnect remote services subscription.",
+  "footerDisplay": "For help and documentation, visit [GitHub](https://github.com/frankea/homebridge-mopar) or [report issues](https://github.com/frankea/homebridge-mopar/issues). Beta - Seeking vehicle testers!",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Platform Name",
+        "type": "string",
+        "default": "Mopar",
+        "required": true
+      },
+      "email": {
+        "title": "Mopar Account Email",
+        "type": "string",
+        "required": true,
+        "format": "email"
+      },
+      "password": {
+        "title": "Mopar Account Password",
+        "type": "string",
+        "required": true,
+        "description": "Same password you use to login at www.mopar.com"
+      },
+      "pin": {
+        "title": "4-Digit Vehicle PIN",
+        "type": "string",
+        "required": true,
+        "pattern": "^[0-9]{4}$",
+        "description": "The PIN you use for remote commands in the mobile app",
+        "placeholder": "1234"
+      },
+      "debug": {
+        "title": "Enable Debug Logging",
+        "type": "boolean",
+        "default": false,
+        "description": "Show detailed debug information in logs (only enable when troubleshooting)"
+      }
+    }
+  },
+  "layout": [
+    {
+      "key": "credentials",
+      "type": "fieldset",
+      "title": "Mopar Account Credentials",
+      "expandable": false,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p class='help-block'><em>Enter your Mopar.com account credentials (same account you use for the mobile app)</em></p>"
+        },
+        "email",
+        "password"
+      ]
+    },
+    {
+      "key": "vehicle",
+      "type": "fieldset",
+      "title": "Vehicle Settings",
+      "expandable": false,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p class='help-block'><em>Enter the 4-digit PIN you use for remote commands</em></p>"
+        },
+        "pin"
+      ]
+    },
+    {
+      "key": "advanced",
+      "type": "fieldset",
+      "title": "Advanced Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p class='help-block'><strong>Debug Logging:</strong> Only enable this if you're troubleshooting issues or reporting bugs. Normal operation doesn't require debug mode.</p>"
+        },
+        "debug"
+      ]
+    }
+  ],
+  "form": null,
+  "display": null
+}

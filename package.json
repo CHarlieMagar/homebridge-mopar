@@ -1,0 +1,77 @@
+{
+  "name": "homebridge-mopar",
+  "displayName": "Homebridge Mopar",
+  "version": "0.9.10",
+  "description": "Homebridge plugin for Mopar vehicles (Chrysler, Dodge, Jeep, Ram, Fiat, Alfa Romeo) with Uconnect",
+  "main": "src/platform.js",
+  "author": {
+    "name": "Adam Franke",
+    "url": "https://github.com/frankea"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/frankea/homebridge-mopar#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frankea/homebridge-mopar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frankea/homebridge-mopar/issues"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "homekit",
+    "mopar",
+    "chrysler",
+    "dodge",
+    "jeep",
+    "ram",
+    "fiat",
+    "alfa-romeo",
+    "uconnect",
+    "stellantis",
+    "car",
+    "vehicle",
+    "remote-start",
+    "remote-lock",
+    "siri",
+    "homebridge-uconnect",
+    "uconnect-replacement"
+  ],
+  "engines": {
+    "node": ">=18.20.0",
+    "homebridge": ">=1.8.0"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/frankea"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:verbose": "jest --verbose",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write src/**/*.js",
+    "watch": "nodemon",
+    "prepublishOnly": "npm run lint && npm test"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "axios-cookiejar-support": "^5.0.2",
+    "puppeteer": "^24.23.0",
+    "tough-cookie": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.8.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-prettier": "^5.5.4",
+    "homebridge": "^2.0.0-beta.0",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}

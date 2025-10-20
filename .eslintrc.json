@@ -1,0 +1,37 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true,
+    "browser": false
+  },
+  "globals": {
+    "gigya": "readonly",
+    "window": "readonly",
+    "document": "readonly"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "commonjs"
+  },
+  "rules": {
+    "no-console": "off",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "prefer-const": "warn",
+    "no-var": "error",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "comma-dangle": ["error", "only-multiline"],
+    "prettier/prettier": "error"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "coverage/",
+    "dist/"
+  ]
+}
+

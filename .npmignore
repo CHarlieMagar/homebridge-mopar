@@ -1,0 +1,75 @@
+# Test files and development
+test/
+*.test.js
+*.har
+scripts/
+diagnostic.js
+jest.config.js
+coverage/
+.eslintrc.json
+.prettierrc.json
+.prettierignore
+
+# GitHub files
+.github
+
+# VSCode and IDE
+.vscode
+.idea
+.claude
+.cursor
+
+# Development tools
+nodemon.json
+.editorconfig
+
+# Development documentation
+VERIFIED_AUDIT.md
+
+# Stats and log data
+stats-*.csv
+reddit-stats.csv
+reddit-log.txt
+daily-log.txt
+homebridge-mopar.log.txt
+
+# Development documentation (keep only README and CHANGELOG for users)
+BETA_RELEASE_SUMMARY.md
+COMMAND_RELIABILITY_FIX.md
+DEVELOPMENT_WORKFLOW.md
+FINAL_REVIEW.md
+FIX_SUMMARY.md
+PROJECT_ROADMAP.md
+PUBLISHING_GUIDE.md
+READY_TO_PUBLISH.md
+REPO_AUDIT.md
+TEST_SETUP_SUMMARY.md
+TESTING_QUICKSTART.md
+VERIFICATION_REQUEST.md
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env
+.env.test
+
+# Mac files
+.DS_Store
