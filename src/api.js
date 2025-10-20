@@ -103,7 +103,7 @@ class MoparAPI {
       await this.getProfile();
       this.log('Profile initialized');
     } catch (e) {
-      this.log.error(`Failed to initialize profile: ${e.message}`);
+      this.log(`ERROR: Failed to initialize profile: ${e.message}`);
       this.debug('This usually means the session cookies are invalid or expired');
       throw e; // Re-throw so caller knows initialization failed
     }
