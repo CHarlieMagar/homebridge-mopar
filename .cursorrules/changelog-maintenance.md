@@ -13,10 +13,10 @@ Update changelog when running:
 
 ## Changelog Format
 
-Follow [Keep a Changelog](https://keepachangelog.com/) format:
+Use Homebridge-compatible format (not strict Keep a Changelog):
 
 ```markdown
-## [X.Y.Z] - YYYY-MM-DD
+## X.Y.Z (YYYY-MM-DD)
 
 ### Added
 - New features
@@ -116,17 +116,23 @@ git push origin latest --tags
 
 ## Unreleased Section
 
-Keep an `[Unreleased]` section at the top for work-in-progress:
+Keep an `Unreleased` section at the top for work-in-progress:
 
 ```markdown
-## [Unreleased]
+## Unreleased
 
 ### Fixed
 - Work in progress...
 
-## [0.9.13] - 2025-10-20
+## 0.9.13 (2025-10-20)
 ...
 ```
 
-When you release, move items from `[Unreleased]` to the new version section.
+When you release, move items from `Unreleased` to the new version section.
+
+## Important: Format for Homebridge UI
+
+**Use parentheses, not square brackets and dashes:**
+- ✅ `## 0.9.13 (2025-10-20)` - Homebridge UI can parse this
+- ❌ `## [0.9.13] - 2025-10-20` - Keep a Changelog format, breaks Homebridge UI parser
 
