@@ -49,13 +49,59 @@ describe('Integration Tests', () => {
       goto: jest.fn().mockResolvedValue(),
       waitForSelector: jest.fn().mockResolvedValue(),
       $eval: jest.fn().mockResolvedValue('test@example.com'),
-      evaluate: jest
-        .fn()
-        .mockResolvedValueOnce({}) // Form validation
-        .mockResolvedValueOnce({ method: 'enter-key', attempted: true }) // Form submission
-        .mockResolvedValueOnce({ authenticated: true, uid: 'user123' }) // Gigya session
-        .mockResolvedValueOnce({ uid: 'user123', uidSignature: 'sig', signatureTimestamp: Date.now() }) // Gigya data
-        .mockResolvedValueOnce({}), // POST form
+      evaluate: jest.fn().mockImplementation((fn) => {
+        // Return appropriate values based on what the function does
+        const fnStr = fn.toString();
+
+        // Email field fill
+        if (fnStr.includes('input[name="username"]') && fnStr.includes('value =')) {
+          return Promise.resolve();
+        }
+        // Password field fill
+        if (fnStr.includes('input[name="password"]') && fnStr.includes('value =')) {
+          return Promise.resolve();
+        }
+        // Form validation events
+        if (fnStr.includes('input[name="username"]') && fnStr.includes('dispatchEvent')) {
+          return Promise.resolve();
+        }
+        // Screenshot/diagnostic checks
+        if (fnStr.includes('window.getComputedStyle')) {
+          return Promise.resolve({ visible: true, disabled: false, text: 'Sign In' });
+        }
+        // Button click
+        if (fnStr.includes('el.click()')) {
+          return Promise.resolve();
+        }
+        // Form submission via Gigya API
+        if (fnStr.includes('gigya.accounts.login')) {
+          return Promise.resolve({ method: 'gigya-api', attempted: true, success: true });
+        }
+        // Gigya session check
+        if (fnStr.includes('gigya.accounts.getAccountInfo')) {
+          return Promise.resolve({
+            authenticated: true,
+            uid: 'user123',
+            uidSignature: 'sig123',
+            signatureTimestamp: Date.now(),
+            profile: { firstName: 'Test', lastName: 'User' },
+          });
+        }
+        // CSRF token extraction
+        if (fnStr.includes(':cq_csrf_token')) {
+          return Promise.resolve(null);
+        }
+        // Form POST submission
+        if (fnStr.includes('form.submit()') || fnStr.includes('form.action')) {
+          return Promise.resolve();
+        }
+        // Scroll/trigger data load
+        if (fnStr.includes('scrollTo')) {
+          return Promise.resolve();
+        }
+        // Default
+        return Promise.resolve({});
+      }),
       cookies: jest.fn().mockResolvedValue([{ name: 'glt_test', value: 'token123', domain: '.mopar.com' }]),
       on: jest.fn(),
       off: jest.fn(),
@@ -228,13 +274,13 @@ describe('Integration Tests', () => {
   });
 
   describe('Error Recovery Scenarios', () => {
-    test('should retry API calls on network errors', async () => {
+    test('should retry on empty vehicle responses', async () => {
       mockSession.get
         .mockResolvedValueOnce({ data: { token: 'csrf123' } })
         .mockResolvedValueOnce({ data: { uid: 'user123' } })
-        .mockRejectedValueOnce(new Error('ECONNREFUSED')) // First attempt fails
-        .mockRejectedValueOnce(new Error('ECONNREFUSED')) // Second attempt fails
-        .mockRejectedValueOnce(new Error('ECONNREFUSED')) // Third attempt fails
+        .mockResolvedValueOnce({ data: [] }) // First attempt - empty
+        .mockResolvedValueOnce({ data: [] }) // Second attempt - empty
+        .mockResolvedValueOnce({ data: [] }) // Third attempt - empty
         .mockResolvedValueOnce({
           data: [{ vin: 'VIN123', make: 'DODGE', model: 'Durango' }],
         }); // Fourth attempt succeeds
@@ -245,7 +291,7 @@ describe('Integration Tests', () => {
 
       await api.initialize();
 
-      // getVehicles has built-in retry logic
+      // getVehicles has built-in retry logic for empty responses
       const vehicles = await api.getVehicles();
 
       expect(vehicles).toHaveLength(1);
