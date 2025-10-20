@@ -177,7 +177,8 @@ describe('MoparPlatform', () => {
 
       await platform.initialize();
 
-      expect(mockLog.error).toHaveBeenCalledWith('EMAIL AND PASSWORD REQUIRED!');
+      expect(mockLog.error).toHaveBeenCalledWith('CONFIGURATION ERRORS');
+      expect(mockLog.error).toHaveBeenCalledWith('1. Email is required');
       expect(MoparAuth).not.toHaveBeenCalled();
     });
 
@@ -187,7 +188,8 @@ describe('MoparPlatform', () => {
 
       await platform.initialize();
 
-      expect(mockLog.error).toHaveBeenCalledWith('EMAIL AND PASSWORD REQUIRED!');
+      expect(mockLog.error).toHaveBeenCalledWith('CONFIGURATION ERRORS');
+      expect(mockLog.error).toHaveBeenCalledWith('1. Password is required');
       expect(MoparAuth).not.toHaveBeenCalled();
     });
 
@@ -197,7 +199,9 @@ describe('MoparPlatform', () => {
 
       await platform.initialize();
 
-      expect(mockLog.error).toHaveBeenCalledWith('EMAIL AND PASSWORD REQUIRED!');
+      expect(mockLog.error).toHaveBeenCalledWith('CONFIGURATION ERRORS');
+      expect(mockLog.error).toHaveBeenCalledWith('1. Email is required');
+      expect(mockLog.error).toHaveBeenCalledWith('2. Password is required');
       expect(MoparAuth).not.toHaveBeenCalled();
     });
   });

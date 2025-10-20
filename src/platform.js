@@ -9,6 +9,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const MoparAuth = require('./auth');
 const MoparAPI = require('./api');
+const ConfigValidator = require('./config-validator');
 
 const PLATFORM_NAME = 'Mopar';
 const PLUGIN_NAME = 'homebridge-mopar';
@@ -74,20 +75,20 @@ class MoparPlatform {
 
   async initialize() {
     try {
-      // Validate configuration
-      if (!this.email || !this.password) {
-        this.log.error('========================================');
-        this.log.error('EMAIL AND PASSWORD REQUIRED!');
-        this.log.error('========================================');
-        this.log.error('Please configure your Mopar.com credentials in config.json');
-        this.log.error('Example:');
+      // Validate configuration with comprehensive validator
+      const validation = ConfigValidator.validate(this.config);
+      
+      if (!validation.valid) {
+        ConfigValidator.logErrors(validation.errors, this.log);
+        this.log.error('');
+        this.log.error('Example configuration:');
         this.log.error('{');
         this.log.error('  "platform": "Mopar",');
+        this.log.error('  "name": "Mopar",');
         this.log.error('  "email": "your-email@example.com",');
         this.log.error('  "password": "your-password",');
         this.log.error('  "pin": "1234"');
         this.log.error('}');
-        this.log.error('========================================');
         return;
       }
 
