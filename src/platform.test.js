@@ -403,7 +403,9 @@ describe('MoparPlatform', () => {
 
     test('should use mutex to prevent concurrent logins', async () => {
       platform.auth.areCookiesValid.mockReturnValue(false);
-      platform.auth.login.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ token: '123' }), 100)));
+      platform.auth.login.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ token: '123' }), 100))
+      );
 
       // Start two concurrent authentication attempts
       const promise1 = platform.ensureAuthenticated();
@@ -660,7 +662,9 @@ describe('MoparPlatform', () => {
       platform = new MoparPlatform(mockLog, mockConfig, mockApi);
       platform.auth = {
         areCookiesValid: jest.fn().mockReturnValue(false),
-        login: jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ token: '123' }), 50))),
+        login: jest
+          .fn()
+          .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ token: '123' }), 50))),
         lastLogin: null,
       };
       platform.moparAPI = {
@@ -670,11 +674,7 @@ describe('MoparPlatform', () => {
     });
 
     test('concurrent ensureAuthenticated calls should only login once', async () => {
-      const promises = [
-        platform.ensureAuthenticated(),
-        platform.ensureAuthenticated(),
-        platform.ensureAuthenticated(),
-      ];
+      const promises = [platform.ensureAuthenticated(), platform.ensureAuthenticated(), platform.ensureAuthenticated()];
 
       await Promise.all(promises);
 

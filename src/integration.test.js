@@ -263,6 +263,9 @@ describe('Integration Tests', () => {
 
       const api = new MoparAPI(testCookies, mockLog);
 
+      // Verify API instance was created
+      expect(api).toBeDefined();
+
       // Verify cookies were set
       expect(mockCookieJar.setCookieSync).toHaveBeenCalledTimes(3);
 
@@ -369,7 +372,7 @@ describe('Integration Tests', () => {
 
       const auth = new MoparAuth('test@example.com', 'password123', mockLog);
       let cookies = await auth.login();
-      let api = new MoparAPI(cookies, mockLog);
+      const api = new MoparAPI(cookies, mockLog);
       await api.initialize();
 
       // Try command - will fail with 403
@@ -473,10 +476,14 @@ describe('Integration Tests', () => {
         return mockHomebridge.registerPlatform.mock.calls[0][2];
       })();
 
-      const platformInstance = new MoparPlatform(mockLog, { email: 'test@example.com', password: 'test' }, {
-        user: { storagePath: () => '/tmp/test' },
-        on: jest.fn(),
-      });
+      const platformInstance = new MoparPlatform(
+        mockLog,
+        { email: 'test@example.com', password: 'test' },
+        {
+          user: { storagePath: () => '/tmp/test' },
+          on: jest.fn(),
+        }
+      );
 
       // Save cache
       await platformInstance.saveVehicleCache(mockVehicles);
@@ -494,4 +501,3 @@ describe('Integration Tests', () => {
     });
   });
 });
-
