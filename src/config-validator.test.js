@@ -98,9 +98,7 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        'Password seems too short (Mopar typically requires 8+ characters)'
-      );
+      expect(result.errors).toContain('Password seems too short (Mopar typically requires 8+ characters)');
     });
 
     test('should pass with 8-character password', () => {
@@ -216,9 +214,7 @@ describe('ConfigValidator', () => {
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBe(4);
       expect(result.errors).toContain('Email format is invalid (must be a valid email address)');
-      expect(result.errors).toContain(
-        'Password seems too short (Mopar typically requires 8+ characters)'
-      );
+      expect(result.errors).toContain('Password seems too short (Mopar typically requires 8+ characters)');
       expect(result.errors).toContain('PIN must be exactly 4 digits (e.g. "1234")');
       expect(result.errors).toContain('Debug mode must be true or false');
     });
@@ -254,9 +250,7 @@ describe('ConfigValidator', () => {
       expect(mockLog.error).toHaveBeenCalledWith('CONFIGURATION ERRORS');
       expect(mockLog.error).toHaveBeenCalledWith('1. Email is required');
       expect(mockLog.error).toHaveBeenCalledWith('2. Password is too short');
-      expect(mockLog.error).toHaveBeenCalledWith(
-        'Please fix these errors in your config.json or Homebridge UI'
-      );
+      expect(mockLog.error).toHaveBeenCalledWith('Please fix these errors in your config.json or Homebridge UI');
       expect(mockLog.error).toHaveBeenCalledWith('Then restart Homebridge');
     });
 
@@ -275,4 +269,3 @@ describe('ConfigValidator', () => {
     });
   });
 });
-

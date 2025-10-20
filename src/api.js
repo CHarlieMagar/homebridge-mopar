@@ -278,11 +278,140 @@ class MoparAPI {
   }
 
   /**
-   * NOTE: Currently returns stub - real-time status updates planned for future
-   * Get current vehicle status (doors, locks, engine, etc.)
+   * Get current vehicle status (doors, locks, engine, battery, etc.)
+   * @param {string} vin - Vehicle identification number
+   * @param {boolean} refresh - Whether to refresh status from vehicle first
+   * @returns {object} Vehicle status object
    */
-  async getVehicleStatus(_vin) {
-    return { available: false, error: 'Real-time status requires vehicle wakeup' };
+  async getVehicleStatus(vin, refresh = false) {
+    try {
+      // Optionally refresh status from vehicle (wakes up vehicle)
+      if (refresh) {
+        this.debug(`Refreshing status from vehicle ${vin}...`);
+        await this.refreshVehicleStatus(vin);
+
+        // Wait for refresh to complete
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      // Try to get vehicle health report (VHR)
+      const vhrData = await this.getVehicleHealth(vin);
+
+      if (vhrData && vhrData.available !== false) {
+        // Parse VHR data into status object
+        const status = this.parseVHRData(vhrData);
+        return { available: true, ...status };
+      }
+
+      // If VHR not available, try to get basic status from vehicle list
+      const vehicles = await this.getVehiclesQuick();
+      const vehicle = vehicles.find((v) => v.vin === vin);
+
+      if (vehicle) {
+        return {
+          available: true,
+          lockStatus: vehicle.lockStatus || 'UNKNOWN',
+          doorStatus: this.parseDoorStatus(vehicle),
+          batteryLevel: this.parseBatteryLevel(vehicle),
+          engineRunning: vehicle.engineRunning || false,
+          odometer: vehicle.odometer,
+          fuelLevel: vehicle.fuelLevel,
+        };
+      }
+
+      // No status data available
+      return { available: false, error: 'No status data available for this vehicle' };
+    } catch (error) {
+      this.debug(`Failed to get vehicle status: ${error.message}`);
+      return { available: false, error: error.message };
+    }
+  }
+
+  /**
+   * Parse Vehicle Health Report data into standardized status
+   * @param {object} vhrData - Raw VHR data from API
+   * @returns {object} Parsed status object
+   */
+  parseVHRData(vhrData) {
+    const status = {};
+
+    // Extract door status if available
+    if (vhrData.doors) {
+      status.doorStatus = {
+        frontLeft: vhrData.doors.frontLeft || vhrData.doors.driverFront || 'UNKNOWN',
+        frontRight: vhrData.doors.frontRight || vhrData.doors.passengerFront || 'UNKNOWN',
+        rearLeft: vhrData.doors.rearLeft || vhrData.doors.driverRear || 'UNKNOWN',
+        rearRight: vhrData.doors.rearRight || vhrData.doors.passengerRear || 'UNKNOWN',
+        trunk: vhrData.doors.trunk || vhrData.doors.liftgate || 'UNKNOWN',
+      };
+    }
+
+    // Extract lock status
+    if (vhrData.lock !== undefined || vhrData.locked !== undefined) {
+      status.lockStatus = vhrData.locked || vhrData.lock === 'LOCKED' ? 'LOCKED' : 'UNLOCKED';
+    }
+
+    // Extract engine status
+    if (vhrData.engine !== undefined) {
+      status.engineRunning = vhrData.engine === 'RUNNING' || vhrData.engine === 'ON';
+    }
+
+    // Extract battery level
+    if (vhrData.battery !== undefined) {
+      status.batteryLevel =
+        typeof vhrData.battery === 'number' ? vhrData.battery : vhrData.battery.level || vhrData.battery.percent || 100;
+    }
+
+    // Extract odometer
+    if (vhrData.odometer !== undefined) {
+      status.odometer = vhrData.odometer;
+    }
+
+    // Extract fuel level
+    if (vhrData.fuel !== undefined) {
+      status.fuelLevel = typeof vhrData.fuel === 'number' ? vhrData.fuel : vhrData.fuel.percent || vhrData.fuel.level;
+    }
+
+    return status;
+  }
+
+  /**
+   * Parse door status from vehicle object
+   * @param {object} vehicle - Vehicle object from getVehicles
+   * @returns {object} Door status object
+   */
+  parseDoorStatus(vehicle) {
+    // Try to extract door status from various possible fields
+    if (vehicle.doors) {
+      return {
+        frontLeft: vehicle.doors.frontLeft || 'CLOSED',
+        frontRight: vehicle.doors.frontRight || 'CLOSED',
+        rearLeft: vehicle.doors.rearLeft || 'CLOSED',
+        rearRight: vehicle.doors.rearRight || 'CLOSED',
+        trunk: vehicle.doors.trunk || 'CLOSED',
+      };
+    }
+
+    // Default: all closed
+    return {
+      frontLeft: 'CLOSED',
+      frontRight: 'CLOSED',
+      rearLeft: 'CLOSED',
+      rearRight: 'CLOSED',
+      trunk: 'CLOSED',
+    };
+  }
+
+  /**
+   * Parse battery level from vehicle object
+   * @param {object} vehicle - Vehicle object from getVehicles
+   * @returns {number} Battery level percentage (0-100)
+   */
+  parseBatteryLevel(vehicle) {
+    if (vehicle.battery !== undefined) {
+      return typeof vehicle.battery === 'number' ? vehicle.battery : vehicle.battery.level || 100;
+    }
+    return 100; // Default: assume full if unknown
   }
 
   /**

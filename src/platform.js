@@ -77,7 +77,7 @@ class MoparPlatform {
     try {
       // Validate configuration with comprehensive validator
       const validation = ConfigValidator.validate(this.config);
-      
+
       if (!validation.valid) {
         ConfigValidator.logErrors(validation.errors, this.log);
         this.log.error('');
