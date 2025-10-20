@@ -120,8 +120,38 @@ class MoparPlatform {
       // Schedule cookie refresh (every 20 hours)
       this.scheduleCookieRefresh();
     } catch (error) {
-      this.log.error('Initialization failed:', error.message);
-      this.log.error('Please check your credentials and try restarting Homebridge');
+      // User-friendly error messages
+      if (error.message.includes('Cannot reach Mopar.com') || error.code === 'ENOTFOUND') {
+        this.log.error('========================================');
+        this.log.error('CANNOT REACH MOPAR.COM');
+        this.log.error('========================================');
+        this.log.error('Please check your internet connection');
+        this.log.error('Verify you can access https://www.mopar.com in your browser');
+      } else if (error.message.includes('Login failed') || error.message.includes('credentials')) {
+        this.log.error('========================================');
+        this.log.error('LOGIN FAILED');
+        this.log.error('========================================');
+        this.log.error('Please verify your Mopar.com credentials in config.json:');
+        this.log.error('- Email address must be correct');
+        this.log.error('- Password must match your Mopar.com account');
+        this.log.error('- Test login at https://www.mopar.com/en-us/sign-in.html');
+      } else if (error.message.includes('Profile request failed') || error.message.includes('Unauthorized')) {
+        this.log.error('========================================');
+        this.log.error('SESSION ERROR');
+        this.log.error('========================================');
+        this.log.error('Mopar API rejected the session');
+        this.log.error('This is usually temporary - the plugin will retry automatically');
+        this.log.error('If this persists, restart Homebridge');
+      } else {
+        this.log.error('========================================');
+        this.log.error('INITIALIZATION FAILED');
+        this.log.error('========================================');
+        this.log.error(`Error: ${error.message}`);
+        this.log.error('Please check your credentials and restart Homebridge');
+        this.log.error('Enable debug mode in config for more details');
+      }
+
+      this.debug(`Full error: ${error.stack}`);
     }
   }
 
@@ -163,7 +193,12 @@ class MoparPlatform {
         this.addVehicleAccessory(vehicle);
       });
     } catch (error) {
-      this.log.error('Failed to discover vehicles:', error.message);
+      // Use API's friendly error logging if available
+      if (this.moparAPI && this.moparAPI.logFriendlyError) {
+        this.moparAPI.logFriendlyError('Vehicle discovery', error);
+      } else {
+        this.log.error('Failed to discover vehicles:', error.message);
+      }
 
       // Try cache as last resort
       const cachedVehicles = await this.loadVehicleCache();
@@ -263,7 +298,14 @@ class MoparPlatform {
           this.log('Background refresh: API still returning empty, will retry with fresh login...');
         }
       } catch (error) {
-        this.log(`Background refresh: Failed (${error.message}), will retry with fresh login...`);
+        if (error.message.includes('Cannot reach') || error.code === 'ENOTFOUND') {
+          this.log.warn('Background refresh: Cannot reach Mopar API - Check internet connection');
+        } else if (error.message.includes('Login') || error.message.includes('credentials')) {
+          this.log.error('Background refresh: Login failed - Check your credentials');
+        } else {
+          this.log.warn(`Background refresh: Failed (${error.message}), will retry with fresh login...`);
+        }
+        this.debug(`Background refresh error: ${error.stack}`);
       }
     };
 
@@ -1062,7 +1104,15 @@ class MoparPlatform {
 
         await this.loginPromise;
       } catch (error) {
-        this.log.error('Session refresh failed:', error.message);
+        if (error.message.includes('Cannot reach') || error.code === 'ENOTFOUND') {
+          this.log.warn('Session refresh failed: Cannot reach Mopar.com - Will retry later');
+        } else if (error.message.includes('timeout')) {
+          this.log.warn('Session refresh timed out - Mopar.com may be slow, will retry later');
+        } else {
+          this.log.error('Session refresh failed:', error.message);
+          this.log.error('Your next command will trigger a fresh login');
+        }
+        this.debug(`Session refresh error: ${error.stack}`);
         this.loginInProgress = false;
         this.loginPromise = null;
       }
@@ -1101,7 +1151,15 @@ class MoparPlatform {
 
         await this.loginPromise;
       } catch (error) {
-        this.log.error('Cookie refresh failed:', error.message);
+        if (error.message.includes('Cannot reach') || error.code === 'ENOTFOUND') {
+          this.log.warn('Cookie refresh failed: Cannot reach Mopar.com - Will retry in 20 hours');
+        } else if (error.message.includes('timeout')) {
+          this.log.warn('Cookie refresh timed out - Will retry in 20 hours');
+        } else {
+          this.log.error('Cookie refresh failed:', error.message);
+          this.log.error('Your next command will trigger a fresh login if needed');
+        }
+        this.debug(`Cookie refresh error: ${error.stack}`);
         this.loginInProgress = false;
         this.loginPromise = null;
       }

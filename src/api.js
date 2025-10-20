@@ -460,6 +460,56 @@ class MoparAPI {
 
     return { success: false, status: 'TIMEOUT' };
   }
+
+  /**
+   * Log user-friendly error messages based on error type
+   * @param {string} operation - What was being attempted
+   * @param {Error} error - The error that occurred
+   */
+  logFriendlyError(operation, error) {
+    // Network errors
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      this.log('ERROR: Cannot reach Mopar API - Check your internet connection');
+      this.debug(`${operation} failed: ${error.message}`);
+    }
+    // HTTP status code errors
+    else if (error.response) {
+      const status = error.response.status;
+      const url = error.config?.url || 'unknown';
+
+      if (status === 401) {
+        this.log('ERROR: Authentication failed - Your session has expired');
+        this.log('Please wait while we re-authenticate automatically...');
+      } else if (status === 403) {
+        this.log('ERROR: Access forbidden - Session or permissions issue');
+        this.log('This usually resolves automatically on retry');
+      } else if (status === 429) {
+        this.log('ERROR: Too many requests to Mopar API');
+        this.log('Please wait a few minutes before trying again');
+      } else if (status === 500 || status === 502 || status === 503) {
+        this.log(`ERROR: Mopar server error (${status}) - Their servers may be down`);
+        this.log('This is temporary - try again in a few minutes');
+      } else if (status === 404) {
+        this.log('ERROR: API endpoint not found');
+        this.debug(`URL: ${url}`);
+      } else {
+        this.log(`ERROR: ${operation} failed with HTTP ${status}`);
+        this.debug(`URL: ${url}, Message: ${error.message}`);
+      }
+    }
+    // Request made but no response
+    else if (error.request) {
+      this.log('ERROR: No response from Mopar API - Network timeout');
+      this.log('Check your internet connection or try again later');
+    }
+    // Something else
+    else {
+      this.log(`ERROR: ${operation} failed: ${error.message}`);
+    }
+
+    // Always log full stack in debug mode
+    this.debug(`Full error: ${error.stack}`);
+  }
 }
 
 module.exports = MoparAPI;
