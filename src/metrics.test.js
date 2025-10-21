@@ -147,18 +147,18 @@ describe('Metrics', () => {
   describe('getSummary', () => {
     test('should include uptime', async () => {
       jest.useRealTimers(); // Use real timers for Date.now()
-      
+
       const testMetrics = new Metrics();
       const before = testMetrics.startTime;
-      
+
       // Wait a small amount of real time
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       const summary = testMetrics.getSummary();
       // Uptime should be positive
       expect(summary.uptime.milliseconds).toBeGreaterThan(0);
       expect(summary.uptime.formatted).toBeDefined();
-      
+
       jest.useFakeTimers(); // Restore fake timers
     });
 
@@ -253,14 +253,14 @@ describe('Metrics', () => {
 
     test('should reset uptime start time', async () => {
       jest.useRealTimers();
-      
+
       const testMetrics = new Metrics();
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       testMetrics.reset();
 
       const summary = testMetrics.getSummary();
       expect(summary.uptime.milliseconds).toBeLessThan(10); // Should be nearly zero
-      
+
       jest.useFakeTimers();
     });
   });
@@ -270,15 +270,15 @@ describe('Metrics', () => {
       const metricsCode = require('fs').readFileSync(__filename.replace('.test.js', '.js'), 'utf8');
 
       // Verify no fetch, axios, http, https, or net imports
-      expect(metricsCode).not.toContain('require(\'http');
-      expect(metricsCode).not.toContain('require(\'https');
-      expect(metricsCode).not.toContain('require(\'axios');
-      expect(metricsCode).not.toContain('require(\'fetch');
-      expect(metricsCode).not.toContain('require(\'net');
+      expect(metricsCode).not.toContain("require('http");
+      expect(metricsCode).not.toContain("require('https");
+      expect(metricsCode).not.toContain("require('axios");
+      expect(metricsCode).not.toContain("require('fetch");
+      expect(metricsCode).not.toContain("require('net");
       expect(metricsCode).not.toContain('require("http');
       expect(metricsCode).not.toContain('require("axios');
       expect(metricsCode).not.toContain('fetch(');
-      
+
       // Verify privacy guarantee is documented
       expect(metricsCode).toContain('PRIVACY GUARANTEE');
       expect(metricsCode).toContain('NO external calls');
@@ -294,4 +294,3 @@ describe('Metrics', () => {
     });
   });
 });
-
