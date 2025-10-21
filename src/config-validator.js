@@ -19,11 +19,46 @@ class ConfigValidator {
       errors.push('Email format is invalid (must be a valid email address)');
     }
 
-    // Password validation
+    // Password validation (based on Mopar.com requirements)
     if (!config.password) {
       errors.push('Password is required');
-    } else if (config.password.length < 8) {
-      errors.push('Password seems too short (Mopar typically requires 8+ characters)');
+    } else {
+      const password = config.password;
+      
+      // Length: 8-16 characters
+      if (password.length < 8 || password.length > 16) {
+        errors.push('Password must be 8-16 characters (Mopar requirement)');
+      }
+      
+      // Must have uppercase
+      if (!/[A-Z]/.test(password)) {
+        errors.push('Password must contain at least 1 uppercase letter (A-Z)');
+      }
+      
+      // Must have lowercase
+      if (!/[a-z]/.test(password)) {
+        errors.push('Password must contain at least 1 lowercase letter (a-z)');
+      }
+      
+      // Must have number
+      if (!/[0-9]/.test(password)) {
+        errors.push('Password must contain at least 1 number (0-9)');
+      }
+      
+      // Must have special character from allowed set
+      if (!/[@$!%*?&_-]/.test(password)) {
+        errors.push('Password must contain at least 1 special character (@$!%*?&_-)');
+      }
+      
+      // No character repeated more than twice
+      if (/(.)\1{2,}/.test(password)) {
+        errors.push('Password cannot have any character repeated more than twice (e.g. aaa, 111)');
+      }
+      
+      // No more than two sequential characters
+      if (this.hasSequentialCharacters(password)) {
+        errors.push('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
+      }
     }
 
     // PIN validation (optional field)
@@ -52,6 +87,30 @@ class ConfigValidator {
   static isValidEmail(email) {
     // Basic email validation regex - checks for user@domain.tld format
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  /**
+   * Check if password has more than two sequential characters
+   * Sequential means: ABC, xyz, 123, etc. (or reverse: CBA, zyx, 321)
+   * @param {string} password - Password to check
+   * @returns {boolean} True if has sequential characters
+   */
+  static hasSequentialCharacters(password) {
+    for (let i = 0; i < password.length - 2; i++) {
+      const char1 = password.charCodeAt(i);
+      const char2 = password.charCodeAt(i + 1);
+      const char3 = password.charCodeAt(i + 2);
+
+      // Check if three consecutive characters are sequential
+      // e.g., ABC (65,66,67), xyz (120,121,122), 123 (49,50,51)
+      if (char2 === char1 + 1 && char3 === char2 + 1) {
+        return true; // Found sequential ascending (ABC, xyz, 123)
+      }
+      if (char2 === char1 - 1 && char3 === char2 - 1) {
+        return true; // Found sequential descending (CBA, zyx, 321)
+      }
+    }
+    return false;
   }
 
   /**
