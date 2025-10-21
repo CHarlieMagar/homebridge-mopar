@@ -10,6 +10,7 @@ const path = require('path');
 const MoparAuth = require('./auth');
 const MoparAPI = require('./api');
 const ConfigValidator = require('./config-validator');
+const RateLimiter = require('./rate-limiter');
 
 const PLATFORM_NAME = 'Mopar';
 const PLUGIN_NAME = 'homebridge-mopar';
@@ -41,6 +42,9 @@ class MoparPlatform {
     // Authentication and API clients
     this.auth = null;
     this.moparAPI = null;
+
+    // Rate limiter for API protection
+    this.rateLimiter = new RateLimiter();
 
     // Login mutex to prevent concurrent authentication attempts
     this.loginInProgress = false;
@@ -828,6 +832,21 @@ class MoparPlatform {
   }
 
   async sendCommand(vin, action) {
+    // Check rate limit
+    const commandType = action.toLowerCase();
+    const rateLimitCheck = this.rateLimiter.canExecute(commandType, vin);
+
+    if (!rateLimitCheck.allowed) {
+      this.log.warn(`========================================`);
+      this.log.warn(`RATE LIMIT EXCEEDED`);
+      this.log.warn(`========================================`);
+      this.log.warn(`${action} command blocked to protect your Mopar account`);
+      this.log.warn(`Limit: ${rateLimitCheck.limit}`);
+      this.log.warn(`Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again`);
+      this.log.warn(`This prevents Mopar from blocking your account for excessive API use`);
+      return false;
+    }
+
     return this.executeCommandWithRetry(action, async () => {
       this.log(`Sending ${action} to ${vin}...`);
 
@@ -847,6 +866,20 @@ class MoparPlatform {
   }
 
   async startEngine(vin) {
+    // Check rate limit
+    const rateLimitCheck = this.rateLimiter.canExecute('start', vin);
+
+    if (!rateLimitCheck.allowed) {
+      this.log.warn(`========================================`);
+      this.log.warn(`RATE LIMIT EXCEEDED`);
+      this.log.warn(`========================================`);
+      this.log.warn(`Remote start blocked to protect your Mopar account`);
+      this.log.warn(`Limit: ${rateLimitCheck.limit}`);
+      this.log.warn(`Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again`);
+      this.log.warn(`Excessive remote starts can drain battery and may trigger account restrictions`);
+      return false;
+    }
+
     const accessory = this.accessories.find((acc) => acc.context.vehicle.vin === vin);
 
     return this.executeCommandWithRetry('Engine START', async () => {
@@ -871,6 +904,14 @@ class MoparPlatform {
   }
 
   async stopEngine(vin) {
+    // Check rate limit
+    const rateLimitCheck = this.rateLimiter.canExecute('stop', vin);
+
+    if (!rateLimitCheck.allowed) {
+      this.log.warn(`Stop engine command rate limited - please wait ${rateLimitCheck.waitMinutes} minute(s)`);
+      return false;
+    }
+
     const accessory = this.accessories.find((acc) => acc.context.vehicle.vin === vin);
 
     return this.executeCommandWithRetry('Engine STOP', async () => {
@@ -892,6 +933,15 @@ class MoparPlatform {
   }
 
   async hornAndLights(vin) {
+    // Check rate limit
+    const rateLimitCheck = this.rateLimiter.canExecute('hornLights', vin);
+
+    if (!rateLimitCheck.allowed) {
+      this.log.warn(`Horn and lights command rate limited - please wait ${rateLimitCheck.waitMinutes} minute(s)`);
+      this.log.warn(`Limit: ${rateLimitCheck.limit}`);
+      return false;
+    }
+
     return this.executeCommandWithRetry('Horn and Lights', async () => {
       this.log(`Activating horn and lights for ${vin}...`);
       const serviceRequestId = await this.moparAPI.hornAndLights(vin);
@@ -908,6 +958,15 @@ class MoparPlatform {
   }
 
   async setClimate(vin, temperature) {
+    // Check rate limit
+    const rateLimitCheck = this.rateLimiter.canExecute('climate', vin);
+
+    if (!rateLimitCheck.allowed) {
+      this.log.warn(`Climate control command rate limited - please wait ${rateLimitCheck.waitMinutes} minute(s)`);
+      this.log.warn(`Limit: ${rateLimitCheck.limit}`);
+      return false;
+    }
+
     return this.executeCommandWithRetry('Climate Control', async () => {
       this.log(`Setting climate to ${temperature}°F for ${vin}...`);
       const serviceRequestId = await this.moparAPI.setClimate(vin, this.pin, temperature);
