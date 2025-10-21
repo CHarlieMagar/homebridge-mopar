@@ -141,7 +141,7 @@ class MoparAPI {
 
   async getProfile() {
     const url = `${this.baseURL}/moparsvc/user/getProfile`;
-    
+
     // Retry logic: Mopar backend sometimes returns 403 immediately after login
     // The session needs a few seconds to fully propagate
     const maxRetries = 3;
@@ -168,13 +168,13 @@ class MoparAPI {
       if (response.data && (response.data.status === 'failed' || response.data.errorCode)) {
         const errorMsg = response.data.errorDesc || response.data.msg || 'Unknown error';
         const errorCode = response.data.errorCode || 'no code';
-        
+
         // If it's a 403 and we have retries left, continue to retry
         if (errorCode === '403' && attempt < maxRetries) {
           this.debug(`Profile returned 403 on attempt ${attempt}, will retry...`);
           continue;
         }
-        
+
         // Out of retries or different error - throw
         throw new Error(`Profile request failed: ${errorMsg} (${errorCode})`);
       }
