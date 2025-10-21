@@ -6,6 +6,65 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## 0.9.14-beta.0 (2025-10-20)
+
+### Added
+- **Configuration Validator** - Comprehensive config validation with helpful error messages
+  - Email format validation
+  - Password length validation (min 8 characters)
+  - PIN format validation (exactly 4 digits)
+  - Shows all validation errors at once with numbered list
+  - Prevents initialization with invalid config
+- **Real-Time Vehicle Status** - Full implementation with VHR endpoint support
+  - Door status for all 5 doors (front left/right, rear left/right, trunk)
+  - Battery level monitoring
+  - Lock status updates
+  - Engine running status
+  - Odometer reading
+  - Fuel level tracking (when available)
+  - Automatic fallback to vehicle list when VHR unavailable
+- **Rate Limiting & API Protection** - Prevents account blocks from excessive API use
+  - Start/Stop engine: 3 per hour (protects battery)
+  - Lock/Unlock: 10 per 5 minutes
+  - Horn & Lights: 5 per 5 minutes (prevents neighbor complaints)
+  - Climate: 5 per 10 minutes
+  - Per-vehicle tracking allows multiple vehicles
+  - User-friendly warnings with wait times when limits exceeded
+- **Structured Logging System** - Consistent logging across all classes
+  - Support for error, warn, info, log, debug, and trace levels
+  - Smart detection of Homebridge logger vs simple function
+  - Proper method binding for error/warn methods
+  - Backward compatible with existing code
+- **Local-Only Metrics** - Debugging statistics (Homebridge verified compatible)
+  - **NO external calls, NO tracking, NO data transmission**
+  - Command success/failure rates and average durations
+  - API call statistics
+  - Error occurrence tracking
+  - Login and session refresh statistics
+  - Plugin uptime tracking
+  - All data stays on user's machine
+
+### Improved
+- **Better Error Handling** - User-friendly error messages throughout codebase
+  - Network errors: "Cannot reach Mopar.com - Check your internet connection"
+  - Timeout errors: "Login timed out - Mopar.com may be slow or unreachable"
+  - SSL errors: "Check your system time and date settings"
+  - HTTP 401/403/429/500 errors with specific guidance
+  - Initialization errors with clear banners and actionable steps
+  - All errors include debug stack traces when debug mode enabled
+
+### Fixed
+- CHANGELOG format updated for Homebridge UI compatibility
+  - Changed from `[X.Y.Z] - DATE` to `X.Y.Z (DATE)` format
+  - Homebridge UI can now properly parse and display changelog
+- .npmignore updated to exclude .cursorrules/ directory
+
+### Technical
+- Added 99 new tests (127 → 226 total tests)
+- New test files: config-validator.test.js, rate-limiter.test.js, logger.test.js, metrics.test.js
+- Enhanced api.test.js with vehicle status tests
+- All 226 tests passing
+
 ## 0.9.13 (2025-10-20)
 
 ### Fixed
