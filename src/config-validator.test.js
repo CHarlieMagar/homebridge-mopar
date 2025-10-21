@@ -98,106 +98,46 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must be 8-16 characters (Mopar requirement)');
+      expect(result.errors).toContain('Password must be at least 8 characters');
     });
 
-    test('should fail when password is too long', () => {
+    test('should fail when password is extremely long', () => {
       const config = {
         email: 'test@example.com',
-        password: 'ThisPasswordIsTooLong17!',
+        password: 'ThisPasswordIsWayTooLongForAnything1234567890',
       };
 
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must be 8-16 characters (Mopar requirement)');
+      expect(result.errors).toContain('Password seems unusually long (may not work with Mopar.com)');
     });
 
-    test('should fail when password missing uppercase', () => {
+    test('should pass with 8-character password', () => {
       const config = {
         email: 'test@example.com',
-        password: 'password1!',
+        password: 'password',
       };
 
       const result = ConfigValidator.validate(config);
 
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least 1 uppercase letter (A-Z)');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
     });
 
-    test('should fail when password missing lowercase', () => {
+    test('should pass with password without special characters', () => {
       const config = {
         email: 'test@example.com',
-        password: 'PASSWORD1!',
+        password: 'MyPassword15',
       };
 
       const result = ConfigValidator.validate(config);
 
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least 1 lowercase letter (a-z)');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
     });
 
-    test('should fail when password missing number', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'Password!',
-      };
-
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least 1 number (0-9)');
-    });
-
-    test('should fail when password missing special character', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'Password1',
-      };
-
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least 1 special character (@$!%*?&_-)');
-    });
-
-    test('should fail when password has character repeated 3 times', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'Passsword1!',
-      };
-
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password cannot have any character repeated more than twice (e.g. aaa, 111)');
-    });
-
-    test('should fail when password has sequential ascending characters', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'XYZword5!',
-      };
-
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
-    });
-
-    test('should fail when password has sequential numbers', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'Password123!',
-      };
-
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
-    });
-
-    test('should pass with valid Mopar-compliant password', () => {
+    test('should pass with password containing special characters', () => {
       const config = {
         email: 'test@example.com',
         password: 'MyPass42!',
@@ -209,16 +149,20 @@ describe('ConfigValidator', () => {
       expect(result.errors).toEqual([]);
     });
 
-    test('should pass with another valid password', () => {
-      const config = {
-        email: 'test@example.com',
-        password: 'Secure$2024',
-      };
+    test('should pass with various valid passwords', () => {
+      const validPasswords = [
+        'password123',      // no special char, no uppercase
+        'PASSWORD123',      // no special char, no lowercase
+        'Password',         // no number, no special char
+        'MyPass42!',        // all requirements (if they existed)
+        'Secure$2024',      // all requirements
+      ];
 
-      const result = ConfigValidator.validate(config);
-
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual([]);
+      validPasswords.forEach((password) => {
+        const config = { email: 'test@example.com', password };
+        const result = ConfigValidator.validate(config);
+        expect(result.valid).toBe(true);
+      });
     });
 
     test('should fail when PIN is not 4 digits', () => {
@@ -320,16 +264,10 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      // Password "short" will fail multiple requirements:
-      // 1. Email invalid
-      // 2. Length (< 8)
-      // 3. No uppercase
-      // 4. No number
-      // 5. No special char
-      // 6. PIN invalid
-      // 7. Debug not boolean
-      expect(result.errors.length).toBeGreaterThanOrEqual(7);
+      // Should have at least 4 errors: email, password, PIN, debug
+      expect(result.errors.length).toBe(4);
       expect(result.errors).toContain('Email format is invalid (must be a valid email address)');
+      expect(result.errors).toContain('Password must be at least 8 characters');
       expect(result.errors).toContain('PIN must be exactly 4 digits (e.g. "1234")');
       expect(result.errors).toContain('Debug mode must be true or false');
     });
