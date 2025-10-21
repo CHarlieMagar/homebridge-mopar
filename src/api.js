@@ -141,25 +141,50 @@ class MoparAPI {
 
   async getProfile() {
     const url = `${this.baseURL}/moparsvc/user/getProfile`;
-    const timestamp = Date.now();
+    
+    // Retry logic: Mopar backend sometimes returns 403 immediately after login
+    // The session needs a few seconds to fully propagate
+    const maxRetries = 3;
+    const retryDelay = 3000; // 3 seconds between retries
 
-    const response = await this.session.get(`${url}?timestamp=${timestamp}`, {
-      headers: {
-        Referer: 'https://www.mopar.com/chrysler/en-us/my-vehicle/dashboard.html',
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      if (attempt > 1) {
+        this.debug(`Profile retry attempt ${attempt}/${maxRetries} after ${retryDelay}ms delay...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
 
-    this.debug(`Profile loaded: ${JSON.stringify(response.data).substring(0, 200)}`);
+      const timestamp = Date.now();
+      const response = await this.session.get(`${url}?timestamp=${timestamp}`, {
+        headers: {
+          Referer: 'https://www.mopar.com/chrysler/en-us/my-vehicle/dashboard.html',
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
 
-    // Check for error response
-    if (response.data && (response.data.status === 'failed' || response.data.errorCode)) {
-      const errorMsg = response.data.errorDesc || response.data.msg || 'Unknown error';
-      throw new Error(`Profile request failed: ${errorMsg} (${response.data.errorCode || 'no code'})`);
+      this.debug(`Profile loaded (attempt ${attempt}): ${JSON.stringify(response.data).substring(0, 200)}`);
+
+      // Check for error response
+      if (response.data && (response.data.status === 'failed' || response.data.errorCode)) {
+        const errorMsg = response.data.errorDesc || response.data.msg || 'Unknown error';
+        const errorCode = response.data.errorCode || 'no code';
+        
+        // If it's a 403 and we have retries left, continue to retry
+        if (errorCode === '403' && attempt < maxRetries) {
+          this.debug(`Profile returned 403 on attempt ${attempt}, will retry...`);
+          continue;
+        }
+        
+        // Out of retries or different error - throw
+        throw new Error(`Profile request failed: ${errorMsg} (${errorCode})`);
+      }
+
+      // Success!
+      return response.data;
     }
 
-    return response.data;
+    // Should never reach here, but just in case
+    throw new Error('Profile request failed after all retries');
   }
 
   /**

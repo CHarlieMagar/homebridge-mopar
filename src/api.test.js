@@ -188,6 +188,33 @@ describe('MoparAPI', () => {
         expect.any(Object)
       );
     });
+
+    test('should retry on 403 error and succeed', async () => {
+      mockSession.get
+        .mockResolvedValueOnce({
+          data: { errorCode: '403', errorDesc: 'Unauthorized Access', status: 'failed' },
+        })
+        .mockResolvedValueOnce({
+          data: { errorCode: '403', errorDesc: 'Unauthorized Access', status: 'failed' },
+        })
+        .mockResolvedValueOnce({
+          data: { uid: 'user123' },
+        });
+
+      const profile = await api.getProfile();
+
+      expect(profile.uid).toBe('user123');
+      expect(mockSession.get).toHaveBeenCalledTimes(3);
+    });
+
+    test('should fail after max retries on persistent 403', async () => {
+      mockSession.get.mockResolvedValue({
+        data: { errorCode: '403', errorDesc: 'Unauthorized Access', status: 'failed' },
+      });
+
+      await expect(api.getProfile()).rejects.toThrow('Profile request failed: Unauthorized Access (403)');
+      expect(mockSession.get).toHaveBeenCalledTimes(3);
+    });
   });
 
   describe('Get Vehicles', () => {
