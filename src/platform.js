@@ -837,13 +837,13 @@ class MoparPlatform {
     const rateLimitCheck = this.rateLimiter.canExecute(commandType, vin);
 
     if (!rateLimitCheck.allowed) {
-      this.log.warn(`========================================`);
-      this.log.warn(`RATE LIMIT EXCEEDED`);
-      this.log.warn(`========================================`);
+      this.log.warn('========================================');
+      this.log.warn('RATE LIMIT EXCEEDED');
+      this.log.warn('========================================');
       this.log.warn(`${action} command blocked to protect your Mopar account`);
       this.log.warn(`Limit: ${rateLimitCheck.limit}`);
       this.log.warn(`Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again`);
-      this.log.warn(`This prevents Mopar from blocking your account for excessive API use`);
+      this.log.warn('This prevents Mopar from blocking your account for excessive API use');
       return false;
     }
 
@@ -870,13 +870,13 @@ class MoparPlatform {
     const rateLimitCheck = this.rateLimiter.canExecute('start', vin);
 
     if (!rateLimitCheck.allowed) {
-      this.log.warn(`========================================`);
-      this.log.warn(`RATE LIMIT EXCEEDED`);
-      this.log.warn(`========================================`);
-      this.log.warn(`Remote start blocked to protect your Mopar account`);
+      this.log.warn('========================================');
+      this.log.warn('RATE LIMIT EXCEEDED');
+      this.log.warn('========================================');
+      this.log.warn('Remote start blocked to protect your Mopar account');
       this.log.warn(`Limit: ${rateLimitCheck.limit}`);
       this.log.warn(`Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again`);
-      this.log.warn(`Excessive remote starts can drain battery and may trigger account restrictions`);
+      this.log.warn('Excessive remote starts can drain battery and may trigger account restrictions');
       return false;
     }
 

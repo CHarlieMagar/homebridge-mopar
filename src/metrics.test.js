@@ -149,7 +149,6 @@ describe('Metrics', () => {
       jest.useRealTimers(); // Use real timers for Date.now()
 
       const testMetrics = new Metrics();
-      const before = testMetrics.startTime;
 
       // Wait a small amount of real time
       await new Promise((resolve) => setTimeout(resolve, 10));

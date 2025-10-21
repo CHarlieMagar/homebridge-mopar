@@ -124,4 +124,3 @@ class RateLimiter {
 }
 
 module.exports = RateLimiter;
-

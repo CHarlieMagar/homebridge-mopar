@@ -1,9 +1,9 @@
 /**
  * Local Metrics Collector
- * 
+ *
  * PRIVACY GUARANTEE: All metrics stay on the user's local machine.
  * NO external calls, NO tracking, NO data transmission.
- * 
+ *
  * Purpose: Help users debug issues by tracking local statistics.
  * Metrics are only visible when debug logging is enabled.
  */
@@ -265,4 +265,3 @@ class Metrics {
 }
 
 module.exports = Metrics;
-
