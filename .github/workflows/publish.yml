@@ -33,7 +33,14 @@ jobs:
         run: npm test -- --ci --maxWorkers=2
       
       - name: Publish to npm
-        run: npm publish
+        run: |
+          if [[ "${{ github.ref_name }}" == *"beta"* ]]; then
+            echo "Publishing as beta tag..."
+            npm publish --tag beta
+          else
+            echo "Publishing as latest tag..."
+            npm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
