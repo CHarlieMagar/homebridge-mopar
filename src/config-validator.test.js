@@ -170,9 +170,7 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        'Password cannot have any character repeated more than twice (e.g. aaa, 111)'
-      );
+      expect(result.errors).toContain('Password cannot have any character repeated more than twice (e.g. aaa, 111)');
     });
 
     test('should fail when password has sequential ascending characters', () => {
@@ -184,9 +182,7 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        'Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)'
-      );
+      expect(result.errors).toContain('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
     });
 
     test('should fail when password has sequential numbers', () => {
@@ -198,9 +194,7 @@ describe('ConfigValidator', () => {
       const result = ConfigValidator.validate(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        'Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)'
-      );
+      expect(result.errors).toContain('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
     });
 
     test('should pass with valid Mopar-compliant password', () => {
@@ -330,7 +324,7 @@ describe('ConfigValidator', () => {
       // 1. Email invalid
       // 2. Length (< 8)
       // 3. No uppercase
-      // 4. No number  
+      // 4. No number
       // 5. No special char
       // 6. PIN invalid
       // 7. Debug not boolean

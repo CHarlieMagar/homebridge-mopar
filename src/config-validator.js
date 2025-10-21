@@ -24,37 +24,37 @@ class ConfigValidator {
       errors.push('Password is required');
     } else {
       const password = config.password;
-      
+
       // Length: 8-16 characters
       if (password.length < 8 || password.length > 16) {
         errors.push('Password must be 8-16 characters (Mopar requirement)');
       }
-      
+
       // Must have uppercase
       if (!/[A-Z]/.test(password)) {
         errors.push('Password must contain at least 1 uppercase letter (A-Z)');
       }
-      
+
       // Must have lowercase
       if (!/[a-z]/.test(password)) {
         errors.push('Password must contain at least 1 lowercase letter (a-z)');
       }
-      
+
       // Must have number
       if (!/[0-9]/.test(password)) {
         errors.push('Password must contain at least 1 number (0-9)');
       }
-      
+
       // Must have special character from allowed set
       if (!/[@$!%*?&_-]/.test(password)) {
         errors.push('Password must contain at least 1 special character (@$!%*?&_-)');
       }
-      
+
       // No character repeated more than twice
       if (/(.)\1{2,}/.test(password)) {
         errors.push('Password cannot have any character repeated more than twice (e.g. aaa, 111)');
       }
-      
+
       // No more than two sequential characters
       if (this.hasSequentialCharacters(password)) {
         errors.push('Password cannot have more than two sequential characters (e.g. ABC, xyz, 123)');
