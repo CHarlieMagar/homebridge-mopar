@@ -1,7 +1,7 @@
 {
   "name": "homebridge-mopar",
   "displayName": "Homebridge Mopar",
-  "version": "0.9.14-beta.0",
+  "version": "0.9.14-beta.1",
   "description": "Homebridge plugin for Mopar vehicles (Chrysler, Dodge, Jeep, Ram, Fiat, Alfa Romeo) with Uconnect",
   "main": "src/platform.js",
   "author": {
